@@ -13,26 +13,15 @@ xmli = '{http://www.w3.org/2001/XMLSchema-instance}'
 codeArray = []
 updatedCodes=[]
 
-for Element in root.iter(xsi + 'DataElements'):
-    for DataFolder in Element.iter(xsi + 'DataElementDef'):
-        if DataFolder.attrib[xmli + 'type'] == 'DataFolderDef' and DataFolder.attrib['Name'] == 'DiagnosesCodeSets':
-            for each in DataFolder:
-                for DataElements in each:
-                     if DataElements.attrib[xmli + 'type'] == 'InlineValueListDef':
-                        for DataElement in DataElements.iter(xsi + 'Items'):
-                            for item in DataElement: 
-                                for value in item:
-                                    if value.tag == xsi + 'Value':  
-                                         if (len(value.text) < 6 and len(value.text) > 3 and "-" not in value.text and "." not in value.text) or (value.text[0].isalpha() and "." not in value.text):
-                                            
-                                            front = value.text[:3]
-                                            back = value.text[3:]
-                                            new_value = (front + '.' + back)
-                                            value.text = new_value
 
+for DataElements in root.iter(xsi + 'DataElementDef'):
+    if DataElements.attrib[xmli + 'type'] == 'DataFolderDef' and DataElements.attrib['Name'] == 'DiagnosesCodeSets':
+        for DataElementDef in DataElements.findall(xsi + 'DataElements/'+ xsi + 'DataElementDef/'+ xsi + 'Items/' + xsi + 'ValueListItemDef/' + xsi + 'Value'):
+            if (len(DataElementDef.text) < 6 and len(DataElementDef.text) > 3 and "-" not in DataElementDef.text and "." not in DataElementDef.text) or (DataElementDef.text[0].isalpha() and len(DataElementDef.text) > 3 and "-" not in DataElementDef.text and "." not in DataElementDef.text):
+                front = DataElementDef.text[:3]
+                back = DataElementDef.text[3:]
+                new_value = (front + '.' + back)
+                DataElementDef.text = new_value
 
 
 tree.write('output.xml', encoding="utf-8", xml_declaration=True, method="xml")
-#tree.write_c14n('output.xml')
-
-       
